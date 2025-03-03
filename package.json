@@ -38,7 +38,6 @@
     "date-fns": "^3.6.0",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.1.0",
-    "framer": "^2.4.1",
     "framer-motion": "^12.4.7",
     "lucide-react": "^0.395.0",
     "mongodb": "^6.8.0",

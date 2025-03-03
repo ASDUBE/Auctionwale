@@ -18,12 +18,15 @@ const Hero = () => {
         <div className="flex flex-col items-center text-center">
           <motion.h1
             className="mb-6 flex flex-wrap justify-center gap-2 text-2xl font-bold leading-tight text-black dark:text-white sm:text-3xl md:text-5xl lg:gap-4 lg:text-6xl"
-            initial="hidden"
-            animate="visible"
+            initial=""
+            whileInView="visible"
+            viewport={{ once: true }}
             variants={{
+              hidden: { opacity: 0 },
               visible: {
+                opacity: 1,
                 transition: {
-                  staggerChildren: 0.15, // Slightly faster stagger
+                  staggerChildren: 0.15,
                 },
               },
             }}
@@ -33,7 +36,7 @@ const Hero = () => {
                 key={index}
                 className="inline-block"
                 variants={{
-                  hidden: { y: 10, opacity: 0 },
+                  hidden: { y: 5, opacity: 0 },
                   visible: {
                     y: [10, -5, 0],
                     opacity: 1,
@@ -47,8 +50,9 @@ const Hero = () => {
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0.5, y: 2 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}
             className="max-w-3xl text-sm text-gray-700 dark:text-gray-300 sm:text-base md:text-lg"
           >
