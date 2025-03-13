@@ -6,13 +6,27 @@ import { useEffect, useState } from "react";
 import ThemeToggler from "./ThemeToggler";
 import menuData from "./menuData";
 import { useAuth } from "@clerk/nextjs";
-import {
-  UserButton
-} from '@clerk/nextjs' 
+import { useUser } from "@clerk/nextjs";
+import {UserButton} from '@clerk/nextjs' 
 const Header = () => {
   // Navbar toggle
   const [navbarOpen, setNavbarOpen] = useState(false);
   const { isLoaded, userId, sessionId, getToken } = useAuth();
+  const { user } = useUser(); // Fetch logged-in user details
+
+  // Define allowed admin emails
+  const adminEmails = [
+    "surajss.3110@gmail.com",
+    "ashutoshd6198@gmail.com",
+    "admin2@example.com",
+    "admin3@example.com",
+    "admin4@example.com",
+  ];
+
+  // Check if the logged-in user is an admin
+  const isAdmin = user?.primaryEmailAddress?.emailAddress
+    ? adminEmails.includes(user.primaryEmailAddress.emailAddress)
+    : false;
 
   const navbarToggleHandler = () => {
     setNavbarOpen(!navbarOpen);
@@ -115,9 +129,9 @@ const Header = () => {
                   <ul className="block lg:flex lg:space-x-12">
                     {menuData.map((menuItem, index) => (
                       <li key={index} className="group relative">
-                        {menuItem.path ? (
+                        {menuItem.path && typeof menuItem.path === "string" ? (
                           <Link
-                            href={menuItem.path}
+                            href={menuItem.path || "/"}
                             className={`flex py-2 text-base lg:mr-0 lg:inline-flex lg:px-0 lg:py-6 ${
                               usePathName === menuItem.path
                                 ? "text-primary dark:text-white"
@@ -163,11 +177,23 @@ const Header = () => {
                         )}
                       </li>
                     ))}
+                    {/* Show Admin Panel only if logged in AND an admin */}
+                    {user && isAdmin && (
+                      <li>
+                        <Link
+                          href="/admin"
+                          className="flex py-2 text-base text-dark hover:text-primary dark:text-white/70 dark:hover:text-white lg:mr-0 lg:inline-flex lg:px-0 lg:py-6"
+                        >
+                          Admin Panel
+                        </Link>
+                      </li>
+                    )}
                   </ul>
                 </nav>
               </div>
               <div className="flex items-center justify-end pr-16 lg:pr-0">
-              {!userId ? 
+              {!userId ?  
+
               <>
               <Link
                 href="/sign-in"
@@ -175,13 +201,7 @@ const Header = () => {
               >
                 Log In
               </Link>
-              {/*<Link
-                href="/sign-up"
-                className="ease-in-up shadow-btn hover:shadow-btn-hover hidden rounded-sm bg-primary px-8 py-3 text-base font-medium text-white transition duration-300 hover:bg-opacity-90 md:block md:px-9 lg:px-6 xl:px-9"
-              >
-                Sign Up
-              </Link>*/}
-              
+
               </>
             :
             <UserButton/>  
