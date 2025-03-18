@@ -1,16 +1,14 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import PropertyData from "@/components/PropertyCard/propertData"; // Ensure this path and casing are correct
+import PropertyData from "@/components/PropertyCard/propertData";
+import property from "property.json";
+import { Metadata } from "next";
 
-interface Property {
-  ID: string;
-  Property_Type: string;
-  Property_Address: string;
-  Current_Auction_Reserve_Price: number;
-  Image_Url: string;
-  // Add any additional fields as needed
-}
+// export const metadata: Metadata = {
+//   title: "Property Page",
+//   description: "This is Property Page for auctionwale",
+//   // other metadata
+// };
 
 export default function PropertyPage() {
   const searchParams = useSearchParams();
@@ -22,15 +20,13 @@ export default function PropertyPage() {
     budget: searchParams.get("budget") || "",
   };
 
-  const parseBudget = (budget: string): number => {
+  const parseBudget = (budget) => {
     if (!budget) return 0;
     budget = budget.replace(/,/g, "").toLowerCase();
     const numberPattern = /[\d.]+/g;
     const textPattern = /[a-z]+/g;
-    const numberMatch = budget.match(numberPattern);
-    const textMatch = budget.match(textPattern);
-    const number = numberMatch ? parseFloat(numberMatch[0]) : 0;
-    const unit = textMatch ? textMatch[0] : "";
+    const number = parseFloat(budget.match(numberPattern)?.[0]);
+    const unit = budget.match(textPattern)?.[0];
 
     if (isNaN(number)) return 0;
 
@@ -45,7 +41,7 @@ export default function PropertyPage() {
     }
   };
 
-  const formatPrice = (price: number): string => {
+  const formatPrice = (price) => {
     if (price >= 10000000) {
       return (price / 10000000).toFixed(2) + " crore";
     } else if (price >= 100000) {
@@ -54,30 +50,8 @@ export default function PropertyPage() {
     return price.toString();
   };
 
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchProperties() {
-      try {
-        const res = await fetch("/api/properties");
-        if (!res.ok) {
-          throw new Error("Failed to fetch properties");
-        }
-        const data: Property[] = await res.json();
-        setProperties(data);
-      } catch (err: any) {
-        setError(err.message || "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchProperties();
-  }, []);
-
-  const filteredProperties = properties.filter((p) => {
-    const addressIncludes = (searchString: string) =>
+  const filteredProperties = property.filter((p) => {
+    const addressIncludes = (searchString) =>
       p.Property_Address.toLowerCase().includes(searchString.toLowerCase());
 
     const isValidProperty =
@@ -89,7 +63,7 @@ export default function PropertyPage() {
       !isNaN(p.Current_Auction_Reserve_Price) &&
       p.Current_Auction_Reserve_Price > 0;
 
-    const isWithinBudget = (): boolean => {
+    const isWithinBudget = () => {
       if (filter.budget === "") return true;
       const budgetValue = parseBudget(filter.budget);
       return p.Current_Auction_Reserve_Price <= budgetValue;
@@ -100,18 +74,16 @@ export default function PropertyPage() {
       (filter.city === "" || addressIncludes(filter.city)) &&
       (filter.locality === "" || addressIncludes(filter.locality)) &&
       (filter.propertyType === "" ||
-        p.Property_Type.toLowerCase().includes(filter.propertyType.toLowerCase())) &&
+        p.Property_Type.toLowerCase().includes(
+          filter.propertyType.toLowerCase(),
+        )) &&
       isWithinBudget()
     );
   });
 
   return (
     <div className="container mt-20 flex flex-wrap gap-8 p-12">
-      {loading ? (
-        <div>Loading...</div>
-      ) : error ? (
-        <div className="text-red-500">{error}</div>
-      ) : filteredProperties.length > 0 ? (
+      {filteredProperties.length > 0 ? (
         filteredProperties.map((property) => (
           <PropertyData
             key={property.ID}
